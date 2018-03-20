@@ -1,15 +1,24 @@
-# input should be a list with 28 elements in order:
+# input should be a list with 33 elements in order:
 # Crossing, Finishing, Heading_Accuracy, Short_Passing, Volleys,
 # Dribbling, Curve, Free_Kick_Accuracy, Long_Passing, Ball_Control,
 # Acceleration, Sprint_Speed, Agility, Reactions, Balance,
 # Shot_Power, Jumping, Stamina, Strength, Long_Shots,
 # Aggression, Interceptions, Positioning, Vision, Penalties,
 # Marking, Standing_Tackle, Sliding_Tackle
+# GK_Diving, GK_Handling, GK_Kicking, GK_Positioning, GK_Reflexes
 
 
 # calculate the ova of a player at each position
 def calc(p=[], do_round=True):
     pos = []
+    a = .11 * p[13] + \
+        .21 * p[28] + \
+        .21 * p[29] + \
+        .05 * p[30] + \
+        .21 * p[31] + \
+        .21 * p[32]
+    pos.append('GK')
+    pos.append(a)
     a = .04 * p[10] + \
         .06 * p[11] + \
         .1 * p[17] + \
@@ -153,8 +162,8 @@ def calc(p=[], do_round=True):
     pos.append(a)
     # decide whether to round, while comparing two players, do not round.
     if do_round:
-        for i in range(1, 21, 2):
-            pos[i] = round(pos[i])
+        for i in range(1, 23, 2):
+            pos[i] = int(round(pos[i]))
         return pos
     else:
         return pos
@@ -162,17 +171,21 @@ def calc(p=[], do_round=True):
 
 # point as an attacker
 def as_attacker(p=[]):
-    return (calc(p)[15] + calc(p)[17] + calc(p)[19]) / 3
+    return (calc(p)[17] + calc(p)[19] + calc(p)[21]) / 3
 
 
 # point as a midfield
 def as_midfield(p=[]):
-    return (calc(p)[9] + calc(p)[7] + calc(p)[11] + calc(p)[13]) / 4
+    return (calc(p)[11] + calc(p)[9] + calc(p)[13] + calc(p)[15]) / 4
 
 
 # point as a defender
 def as_defender(p=[]):
-    return (calc(p)[1] + calc(p)[3] + calc(p)[5]) / 3
+    return (calc(p)[3] + calc(p)[5] + calc(p)[7]) / 3
+
+
+def as_gk(p=[]):
+    return calc(p)[1]
 
 
 # calc six dimension as pointPAC,pointSHO,pointPAS,pointDRI,pointDEF,pointPHY
@@ -186,7 +199,7 @@ def six_d(p=[], do_round=True):
     pt.append(0.05 * p[16] + 0.25 * p[17] + 0.5 * p[18] + 0.2 * p[20])
     if do_round:
         for i in range(6):
-            pt[i] = round(pt[i])
+            pt[i] = int(round(pt[i]))
         return pt
     else:
         return pt

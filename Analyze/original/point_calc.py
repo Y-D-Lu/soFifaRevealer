@@ -173,3 +173,20 @@ def as_midfield(p=[]):
 # point as a defender
 def as_defender(p=[]):
     return (calc(p)[1] + calc(p)[3] + calc(p)[5]) / 3
+
+
+# calc six dimension as pointPAC,pointSHO,pointPAS,pointDRI,pointDEF,pointPHY
+def six_d(p=[], do_round=True):
+    pt = []
+    pt.append(0.45 * p[10] + 0.55 * p[11])
+    pt.append(0.45 * p[1] + 0.05 * p[4] + 0.2 * p[15] + 0.2 * p[19] + 0.05 * p[22] + 0.05 * p[24])
+    pt.append(0.2 * p[0] + 0.35 * p[3] + 0.05 * p[6] + 0.05 * p[7] + 0.15 * p[8] + 0.2 * p[23])
+    pt.append(0.5 * p[5] + 0.3 * p[9] + 0.1 * p[12] + 0.05 * p[13] + 0.05 * p[14])
+    pt.append(0.1 * p[2] + 0.2 * p[21] + 0.3 * p[25] + 0.3 * p[26] + 0.1 * p[27])
+    pt.append(0.05 * p[16] + 0.25 * p[17] + 0.5 * p[18] + 0.2 * p[20])
+    if do_round:
+        for i in range(6):
+            pt[i] = round(pt[i])
+        return pt
+    else:
+        return pt

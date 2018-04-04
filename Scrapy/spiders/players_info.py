@@ -51,16 +51,18 @@ class sofifa(scrapy.Spider):
 
         Age = p_info[-6]
 
-        # while get a free player, set club to "Free"
+        Nation = sel.xpath('//article/div[1]/div[1]/div/span/a/@title').extract()[0]
 
+        # while get a free player, set club to "Free"
         Club = sel.xpath('//article/div[1]/div[3]//td[3]//li[1]/a/text()')
+        # if a player is neither in the national team nor club
         if Club:
             Club = Club.extract()[0]
-            # jersey_number = sel.xpath('//article/div[1]/div[3]//td[3]//li[4]/text()').extract()[1].split('\n')[1]
+            # but if a player is a free player and a national team player
+            if Club == Nation:
+                Club = 'Free'
         else:
             Club = 'Free'
-
-        Nation = sel.xpath('//article/div[1]/div[1]/div/span/a/@title').extract()[0]
 
         Preferred_Foot = sel.xpath('//article/div[1]/div[3]//td[1]/ul/li[1]/text()').extract()[1].split('\n')[1]
 
@@ -76,34 +78,34 @@ class sofifa(scrapy.Spider):
 
         Potential = sel.xpath('//article/div[1]/div[2]//td[2]/span/text()').extract()[0]
 
-        Value = sel.xpath('//article/div[1]/div[2]//td/span/text()').extract()[2].split('€')[1].replace(
+        Value = sel.xpath('//article/div[1]/div[2]//td[3]/span/text()').extract()[0].split('€')[1].replace(
             'K','000').replace('.5M', '500000').replace('M', '000000')
 
-        Wage = sel.xpath('//article/div[1]/div[2]//td/span/text()').extract()[3].split('€')[1].replace('K', '000')
+        Wage = sel.xpath('//article/div[1]/div[2]//td[4]/span/text()').extract()[0].split('€')[1].replace('K', '000')
 
         Crossing, Finishing, Heading_Accuracy, Short_Passing, Volleys = sel.xpath(
-            '//article/div[2]/div[1]/div/ul/li/span/text()').extract()
+            '//article/div[2]/div[1]/div/ul/li/span[1]/text()').extract()
 
         Dribbling, Curve, FK_Accuracy, Long_Passing, Ball_Control = sel.xpath(
-            '//article/div[2]/div[2]/div/ul/li/span/text()').extract()
+            '//article/div[2]/div[2]/div/ul/li/span[1]/text()').extract()
 
         Acceleration, Sprint_Speed, Agility, Reactions, Balance = sel.xpath(
-            '//article/div[2]/div[3]/div/ul/li/span/text()').extract()
+            '//article/div[2]/div[3]/div/ul/li/span[1]/text()').extract()
 
         Shot_Power, Jumping, Stamina, Strength, Long_Shots = sel.xpath(
-            '//article/div[2]/div[4]/div/ul/li/span/text()').extract()
+            '//article/div[2]/div[4]/div/ul/li/span[1]/text()').extract()
 
         Aggression, Interceptions, Positioning, Vision, Penalties = sel.xpath(
-            '//article/div[3]/div[1]/div/ul/li/span/text()').extract()[0:5]
+            '//article/div[3]/div[1]/div/ul/li/span[1]/text()').extract()[0:5]
 
         # #before version17, there is not 'Composure' attribute
         # Composure = sel.xpath('//article/div[3]/div[1]/div/ul/li/span/text()').extract()[5]
 
         Marking, Standing_Tackle, Sliding_Tackle = sel.xpath(
-            '//article/div[3]/div[2]/div/ul/li/span/text()').extract()
+            '//article/div[3]/div[2]/div/ul/li/span[1]/text()').extract()
 
         GK_Diving, GK_Handling, GK_Kicking, GK_Positioning, GK_Reflexes = sel.xpath(
-            '//article/div[3]/div[3]/div/ul/li/span/text()').extract()
+            '//article/div[3]/div[3]/div/ul/li/span[1]/text()').extract()
 
         # write to csv
         csvpath = current_ver + ".csv"

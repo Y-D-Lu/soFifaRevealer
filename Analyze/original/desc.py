@@ -1,6 +1,6 @@
 import time
 
-from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender
+from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender, df_calc
 
 # attr to calc, 33d without Composure
 alla = [
@@ -71,8 +71,8 @@ def best_pos(p):
 
 
 # select the top player for the field
-# need optimize, now at a extremely low effect
-# takes days and hours to do an analyze
+# at a extremely low effect, takes days and hours to do an analyze
+# never use it unless the input is at a very low num
 def top_pos(p, pos='CM', num=1):
     p = p.copy()
     p['point' + pos] = p['ova']
@@ -96,96 +96,94 @@ def select_nation(p, nation='Spain'):
 
 # determine the fine starting eleven for team
 # in put a team, thus select_club/nation(data,'club/nation')
-# need optimize, now at a extremely low effect
-# takes days and hours to do an analyze
 def starting_eleven(p, fm=form['433FLAT']):
     tm = p
     dictc = {}
     # fit for ST
     for i in range(fm['ST']):
-        tp = top_pos(tm, 'ST')
+        tp = df_calc(tm).sort_values('ovaST', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('ST')
-        dictc[tp['ID'].iloc[0]].append(tp['pointST'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaST'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CF
     for i in range(fm['CF']):
-        tp = top_pos(tm, 'CF')
+        tp = df_calc(tm).sort_values('ovaCF', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CF')
-        dictc[tp['ID'].iloc[0]].append(tp['pointCF'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaCF'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WW
     for i in range(fm['WW']):
-        tp = top_pos(tm, 'WW')
+        tp = df_calc(tm).sort_values('ovaWW', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('WW')
-        dictc[tp['ID'].iloc[0]].append(tp['pointWW'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaWW'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for AM
     for i in range(fm['AM']):
-        tp = top_pos(tm, 'AM')
+        tp = df_calc(tm).sort_values('ovaAM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('AM')
-        dictc[tp['ID'].iloc[0]].append(tp['pointAM'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaAM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WM
     for i in range(fm['WM']):
-        tp = top_pos(tm, 'WM')
+        tp = df_calc(tm).sort_values('ovaWM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('WM')
-        dictc[tp['ID'].iloc[0]].append(tp['pointWM'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaWM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CM
     for i in range(fm['CM']):
-        tp = top_pos(tm, 'CM')
+        tp = df_calc(tm).sort_values('ovaCM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CM')
-        dictc[tp['ID'].iloc[0]].append(tp['pointCM'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaCM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for DM
     for i in range(fm['DM']):
-        tp = top_pos(tm, 'DM')
+        tp = df_calc(tm).sort_values('ovaDM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('DM')
-        dictc[tp['ID'].iloc[0]].append(tp['pointDM'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaDM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CB
     for i in range(fm['CB']):
-        tp = top_pos(tm, 'CB')
+        tp = df_calc(tm).sort_values('ovaCB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CB')
-        dictc[tp['ID'].iloc[0]].append(tp['pointCB'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaCB'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WB
     for i in range(fm['WB']):
-        tp = top_pos(tm, 'WB')
+        tp = df_calc(tm).sort_values('ovaWB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('WB')
-        dictc[tp['ID'].iloc[0]].append(tp['pointWB'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for FB
     for i in range(fm['FB']):
-        tp = top_pos(tm, 'FB')
+        tp = df_calc(tm).sort_values('ovaFB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('FB')
-        dictc[tp['ID'].iloc[0]].append(tp['pointFB'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaFB'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     for i in range(fm['GK']):
-        tp = top_pos(tm, 'GK')
+        tp = df_calc(tm).sort_values('ovaGK', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('GK')
-        dictc[tp['ID'].iloc[0]].append(tp['pointGK'].iloc[0])
+        dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     return dictc
@@ -193,8 +191,8 @@ def starting_eleven(p, fm=form['433FLAT']):
 
 # input some players, such as a club or a nation, you can also input the players you want.
 # output a form makes up the highest ova
-# need optimize, now at a extremely low effect
-# takes days and hours to do an analyze
+# well... due to using greedy algorithm in the function start_eleven(), the result may not be the best
+# need to be optimized
 def best_form(p):
     dict_form={}
     for k in form:

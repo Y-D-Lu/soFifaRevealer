@@ -1,6 +1,8 @@
+import copy
 import time
-
 import itertools
+
+from scipy.spatial.distance import pdist, squareform
 
 from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender, df_calc
 
@@ -51,6 +53,36 @@ form = {
     '343DIAMOND': {'GK': 1, 'FB': 0, 'WB': 0, 'CB': 3, 'DM': 1, 'CM': 0, 'WM': 2, 'AM': 1, 'WW': 2, 'CF': 0, 'ST': 1}
 }
 
+# WingBack
+WB = ['Acceleration','Sprint_Speed','Stamina','Reactions','Interceptions','Ball_Control','Crossing',
+            'Dribbling','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+# FullBack
+FB = ['Acceleration','Sprint_Speed','Stamina','Reactions','Interceptions','Ball_Control','Crossing',
+            'Heading_Accuracy','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+# CenterBack
+CB = ['Sprint_Speed','Jumping','Strength','Reactions','Aggression','Interceptions','Ball_Control',
+              'Heading_Accuracy','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+# DefenceMidfield
+DM = ['Stamina','Strength','Reactions','Aggression','Interceptions','Vision','Ball_Control',
+                   'Long_Passing','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+# WingMidfield
+WM= ['Acceleration','Sprint_Speed','Stamina','Reactions','Positioning','Vision','Ball_Control',
+                'Crossing','Dribbling','Finishing','Long_Passing','Short_Passing']
+# CenterMidfield
+CM = ['Stamina','Reactions','Interceptions','Positioning','Vision','Ball_Control','Dribbling',
+                  'Finishing','Long_Passing','Short_Passing','Long_Shots','Standing_Tackle']
+AM = ['Acceleration','Sprint_Speed','Agility','Reactions','Positioning','Vision','Ball_Control',
+                  'Dribbling','Finishing','Long_Passing','Short_Passing','Long_Shots']
+# CenterForward
+CF = ['Acceleration','Sprint_Speed','Reactions','Positioning','Vision','Ball_Control','Dribbling',
+                 'Finishing','Heading_Accuracy','Short_Passing','Shot_Power','Long_Shots']
+# Winger
+WW = ['Acceleration','Sprint_Speed','Agility','Reactions','Positioning','Vision','Ball_Control','Crossing',
+          'Dribbling','Finishing','Short_Passing','Long_Shots']
+# Striker
+ST = ['Acceleration','Sprint_Speed','Strength','Reactions','Positioning','Ball_Control','Dribbling',
+           'Finishing','Heading_Accuracy','Short_Passing','Shot_Power','Long_Shots','Volleys']
+
 
 # select top players
 def select_top(p, cond='ova', percentage=0.1):
@@ -94,6 +126,37 @@ def select_team(p, club='FC Barcelona'):
 def select_nation(p, nation='Spain'):
     mates = p[p['Nation'] == nation]
     return mates
+
+
+# get similar players that similar to the player input
+def similar(p=[],tid=41,num=10):
+    # determine the best position for the target player and accordingly set the player_s
+    player_s = p[eval(best_pos(p[p['ID'] == tid][alla].iloc[0,:]))]
+    pid = p['ID']
+    name = p['Name']
+
+    target = 0
+    dis = []
+    IDs = []
+    Names = []
+    player_dis = pdist(player_s, 'euclidean')
+    player_dis = squareform(player_dis)
+
+    for i in range(player_s.count()[0]):
+        if pid[i] == tid:
+            target = i
+    for i in range(player_s.count()[0]):
+        if pid[i] != tid:
+            dis.append(player_dis[i][target])
+            IDs.append(pid[i])
+            Names.append(name[i])
+    distemp = copy.deepcopy(dis)
+    distemp.sort()
+    dict_s={}
+    for i in range(num):
+        dict_s[i+1]=[IDs[dis.index(distemp[i])],Names[dis.index(distemp[i])]]
+
+    return dict_s
 
 
 # determine the fine starting eleven for team

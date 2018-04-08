@@ -244,7 +244,7 @@ def best_eleven(p, fm=form['433FLAT']):
     a=0
     # first try 3cm 3cf
     ova = []
-    form=[]
+    form_list=[]
     for dm in itertools.permutations(name_list, dict_pos['DM']):
         rest1 = name_list.difference(dm)
         ovaDM=df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
@@ -266,7 +266,7 @@ def best_eleven(p, fm=form['433FLAT']):
                             for st in itertools.permutations(rest6, dict_pos['ST']):
                                 ovaST = df_calc(p_list[p_list['ID'].isin(st)])['ovaST'].sum()
                                 ova_sum = ovaDM + ovaCM + ovaWM +ovaAM + ovaWW + ovaCF + ovaST
-                                form.append(dm+cm+wm+am+ww+cf+st)
+                                form_list.append(dm+cm+wm+am+ww+cf+st)
                                 ova.append(ova_sum)
                                 a+=1
     # print(ova[ova.index(max(ova))])
@@ -275,9 +275,9 @@ def best_eleven(p, fm=form['433FLAT']):
     for k in dict_pos:
         for num in range(dict_pos[k]):
             pos_order.append(k)
-    for players in list(form[ova.index(max(ova))]):
+    for players in list(form_list[ova.index(max(ova))]):
         dictc[players]=[p_list[p_list['ID']==players]['Name'].values[0]]
-        pos=pos_order[list(form[ova.index(max(ova))]).index(players)]
+        pos=pos_order[list(form_list[ova.index(max(ova))]).index(players)]
         dictc[players].append(pos)
         dictc[players].append(calc(p_list[p_list['ID']==players],False)[pos])
     return dictc

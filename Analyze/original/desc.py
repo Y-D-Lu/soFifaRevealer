@@ -3,6 +3,7 @@ import time
 import itertools
 
 from scipy.spatial.distance import pdist, squareform
+from sklearn.decomposition import PCA
 
 from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender, df_calc
 
@@ -54,34 +55,34 @@ form = {
 }
 
 # WingBack
-WB = ['Acceleration','Sprint_Speed','Stamina','Reactions','Interceptions','Ball_Control','Crossing',
-            'Dribbling','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+WB = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Interceptions', 'Ball_Control', 'Crossing',
+      'Dribbling', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
 # FullBack
-FB = ['Acceleration','Sprint_Speed','Stamina','Reactions','Interceptions','Ball_Control','Crossing',
-            'Heading_Accuracy','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+FB = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Interceptions', 'Ball_Control', 'Crossing',
+      'Heading_Accuracy', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
 # CenterBack
-CB = ['Sprint_Speed','Jumping','Strength','Reactions','Aggression','Interceptions','Ball_Control',
-              'Heading_Accuracy','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+CB = ['Sprint_Speed', 'Jumping', 'Strength', 'Reactions', 'Aggression', 'Interceptions', 'Ball_Control',
+      'Heading_Accuracy', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
 # DefenceMidfield
-DM = ['Stamina','Strength','Reactions','Aggression','Interceptions','Vision','Ball_Control',
-                   'Long_Passing','Short_Passing','Marking','Standing_Tackle','Sliding_Tackle']
+DM = ['Stamina', 'Strength', 'Reactions', 'Aggression', 'Interceptions', 'Vision', 'Ball_Control',
+      'Long_Passing', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
 # WingMidfield
-WM= ['Acceleration','Sprint_Speed','Stamina','Reactions','Positioning','Vision','Ball_Control',
-                'Crossing','Dribbling','Finishing','Long_Passing','Short_Passing']
+WM = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Positioning', 'Vision', 'Ball_Control',
+      'Crossing', 'Dribbling', 'Finishing', 'Long_Passing', 'Short_Passing']
 # CenterMidfield
-CM = ['Stamina','Reactions','Interceptions','Positioning','Vision','Ball_Control','Dribbling',
-                  'Finishing','Long_Passing','Short_Passing','Long_Shots','Standing_Tackle']
-AM = ['Acceleration','Sprint_Speed','Agility','Reactions','Positioning','Vision','Ball_Control',
-                  'Dribbling','Finishing','Long_Passing','Short_Passing','Long_Shots']
+CM = ['Stamina', 'Reactions', 'Interceptions', 'Positioning', 'Vision', 'Ball_Control', 'Dribbling',
+      'Finishing', 'Long_Passing', 'Short_Passing', 'Long_Shots', 'Standing_Tackle']
+AM = ['Acceleration', 'Sprint_Speed', 'Agility', 'Reactions', 'Positioning', 'Vision', 'Ball_Control',
+      'Dribbling', 'Finishing', 'Long_Passing', 'Short_Passing', 'Long_Shots']
 # CenterForward
-CF = ['Acceleration','Sprint_Speed','Reactions','Positioning','Vision','Ball_Control','Dribbling',
-                 'Finishing','Heading_Accuracy','Short_Passing','Shot_Power','Long_Shots']
+CF = ['Acceleration', 'Sprint_Speed', 'Reactions', 'Positioning', 'Vision', 'Ball_Control', 'Dribbling',
+      'Finishing', 'Heading_Accuracy', 'Short_Passing', 'Shot_Power', 'Long_Shots']
 # Winger
-WW = ['Acceleration','Sprint_Speed','Agility','Reactions','Positioning','Vision','Ball_Control','Crossing',
-          'Dribbling','Finishing','Short_Passing','Long_Shots']
+WW = ['Acceleration', 'Sprint_Speed', 'Agility', 'Reactions', 'Positioning', 'Vision', 'Ball_Control', 'Crossing',
+      'Dribbling', 'Finishing', 'Short_Passing', 'Long_Shots']
 # Striker
-ST = ['Acceleration','Sprint_Speed','Strength','Reactions','Positioning','Ball_Control','Dribbling',
-           'Finishing','Heading_Accuracy','Short_Passing','Shot_Power','Long_Shots','Volleys']
+ST = ['Acceleration', 'Sprint_Speed', 'Strength', 'Reactions', 'Positioning', 'Ball_Control', 'Dribbling',
+      'Finishing', 'Heading_Accuracy', 'Short_Passing', 'Shot_Power', 'Long_Shots', 'Volleys']
 
 
 # select top players
@@ -129,9 +130,9 @@ def select_nation(p, nation='Spain'):
 
 
 # get similar players that similar to the player input
-def similar(p=[],tid=41,num=10):
+def similar(p=[], tid=41, num=10):
     # determine the best position for the target player and accordingly set the player_s
-    player_s = p[eval(best_pos(p[p['ID'] == tid][alla].iloc[0,:]))]
+    player_s = p[eval(best_pos(p[p['ID'] == tid][alla].iloc[0, :]))]
     pid = p['ID']
     name = p['Name']
 
@@ -152,9 +153,11 @@ def similar(p=[],tid=41,num=10):
             Names.append(name[i])
     distemp = copy.deepcopy(dis)
     distemp.sort()
-    dict_s={}
+    dict_s = {}
+    # it may be wise to include the target player in the return dict
+    dict_s[0] = [tid, p[p['ID'] == tid]['Name'].values[0]]
     for i in range(num):
-        dict_s[i+1]=[IDs[dis.index(distemp[i])],Names[dis.index(distemp[i])]]
+        dict_s[i + 1] = [IDs[dis.index(distemp[i])], Names[dis.index(distemp[i])]]
 
     return dict_s
 
@@ -297,20 +300,20 @@ def best_eleven(p, fm=form['433FLAT']):
     # it may gets higher point than your DMs, he may be send to the DM by greedy algorithm.
     # so we just use a strategy that might be of some stupid: calc it all and we can know how to combine the best
     # it's really time-costing but, emmm... really exact.
-    dict_pos=fm
+    dict_pos = fm
     dict_pos.pop('GK')
     dict_pos.pop('FB')
     dict_pos.pop('WB')
     dict_pos.pop('CB')
     p_list = tm.sort_values('ova', ascending=False).iloc[0:8]
-    name_list=set(p_list['ID'].values)
-    a=0
+    name_list = set(p_list['ID'].values)
+    a = 0
     # first try 3cm 3cf
     ova = []
-    form_list=[]
+    form_list = []
     for dm in itertools.permutations(name_list, dict_pos['DM']):
         rest1 = name_list.difference(dm)
-        ovaDM=df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
+        ovaDM = df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
         for cm in itertools.permutations(rest1, dict_pos['CM']):
             rest2 = rest1.difference(cm)
             ovaCM = df_calc(p_list[p_list['ID'].isin(cm)])['ovaCM'].sum()
@@ -328,21 +331,21 @@ def best_eleven(p, fm=form['433FLAT']):
                             ovaCF = df_calc(p_list[p_list['ID'].isin(cf)])['ovaCF'].sum()
                             for st in itertools.permutations(rest6, dict_pos['ST']):
                                 ovaST = df_calc(p_list[p_list['ID'].isin(st)])['ovaST'].sum()
-                                ova_sum = ovaDM + ovaCM + ovaWM +ovaAM + ovaWW + ovaCF + ovaST
-                                form_list.append(dm+cm+wm+am+ww+cf+st)
+                                ova_sum = ovaDM + ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
+                                form_list.append(dm + cm + wm + am + ww + cf + st)
                                 ova.append(ova_sum)
-                                a+=1
+                                a += 1
     # print(ova[ova.index(max(ova))])
     print(a)
-    pos_order=[]
+    pos_order = []
     for k in dict_pos:
         for num in range(dict_pos[k]):
             pos_order.append(k)
     for players in list(form_list[ova.index(max(ova))]):
-        dictc[players]=[p_list[p_list['ID']==players]['Name'].values[0]]
-        pos=pos_order[list(form_list[ova.index(max(ova))]).index(players)]
+        dictc[players] = [p_list[p_list['ID'] == players]['Name'].values[0]]
+        pos = pos_order[list(form_list[ova.index(max(ova))]).index(players)]
         dictc[players].append(pos)
-        dictc[players].append(calc(p_list[p_list['ID']==players],False)[pos])
+        dictc[players].append(calc(p_list[p_list['ID'] == players], False)[pos])
     return dictc
 
 
@@ -351,7 +354,7 @@ def best_eleven(p, fm=form['433FLAT']):
 # well... due to using greedy algorithm in the function start_eleven(), the result may not be the best
 # need to be optimized
 def best_form(p):
-    dict_form={}
+    dict_form = {}
     for k in form:
         # print('now '+k)
         # # consume so much time that have to measure it
@@ -360,11 +363,11 @@ def best_form(p):
         team_ova = 0
         for kc in dictc:
             team_ova += dictc[kc][2]
-        dict_form[k] = [dictc,team_ova]
-    ova_list=[]
-    key_list=[]
+        dict_form[k] = [dictc, team_ova]
+    ova_list = []
+    key_list = []
     for k in dict_form:
         ova_list.append(dict_form[k][1])
         key_list.append(k)
-    best_fm=key_list[ova_list.index(max(ova_list))]
+    best_fm = key_list[ova_list.index(max(ova_list))]
     return dict_form[best_fm][0]

@@ -204,4 +204,10 @@ def best_form(p):
         for kc in dictc:
             team_ova += dictc[kc][2]
         dict_form[k] = [dictc,team_ova]
-    return dict_form
+    ova_list=[]
+    key_list=[]
+    for k in dict_form:
+        ova_list.append(dict_form[k][1])
+        key_list.append(k)
+    best_fm=key_list[ova_list.index(max(ova_list))]
+    return dict_form[best_fm][0]

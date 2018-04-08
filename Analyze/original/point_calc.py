@@ -1,12 +1,3 @@
-# Now input a slice of a player and output as a dict
-# Crossing, Finishing, Heading_Accuracy, Short_Passing, Volleys,
-# Dribbling, Curve, Free_Kick_Accuracy, Long_Passing, Ball_Control,
-# Acceleration, Sprint_Speed, Agility, Reactions, Balance,
-# Shot_Power, Jumping, Stamina, Strength, Long_Shots,
-# Aggression, Interceptions, Positioning, Vision, Penalties,
-# Marking, Standing_Tackle, Sliding_Tackle
-# GK_Diving, GK_Handling, GK_Kicking, GK_Positioning, GK_Reflexes
-
 all_attr = [
     'Crossing', 'Finishing', 'Heading_Accuracy', 'Short_Passing', 'Volleys',
     'Dribbling', 'Curve', 'Free_Kick_Accuracy', 'Long_Passing', 'Ball_Control',
@@ -18,19 +9,10 @@ all_attr = [
 ]
 
 
-# calculate the ova of a player at each position
-
-
+# calculate the ova of a player at each position, just input a dataframe
 def calc(p, do_round=True):
+    
     ova = {'GK': 0, 'FB': 0, 'WB': 0, 'CB': 0, 'DM': 0, 'CM': 0, 'WM': 0, 'AM': 0, 'WW': 0, 'CF': 0, 'ST': 0}
-
-    # Crossing, Finishing, Heading_Accuracy, Short_Passing, Volleys,
-    # Dribbling, Curve, Free_Kick_Accuracy, Long_Passing, Ball_Control,
-    # Acceleration, Sprint_Speed, Agility, Reactions, Balance,
-    # Shot_Power, Jumping, Stamina, Strength, Long_Shots,
-    # Aggression, Interceptions, Positioning, Vision, Penalties,
-    # Marking, Standing_Tackle, Sliding_Tackle
-    # GK_Diving, GK_Handling, GK_Kicking, GK_Positioning, GK_Reflexes
 
     a = .11 * p['Reactions'] + \
         .21 * p['GK_Diving'] + \
@@ -360,13 +342,12 @@ def as_gk(p=[]):
 # or might pointDIV,pointHAN,pointKIC,pointREF,pointSPD,pointPOS => add it in the future
 def six_d(p, do_round=True):
     p = p[all_attr].values[0]
-    pt = []
-    pt.append(0.45 * p[10] + 0.55 * p[11])
-    pt.append(0.45 * p[1] + 0.05 * p[4] + 0.2 * p[15] + 0.2 * p[19] + 0.05 * p[22] + 0.05 * p[24])
-    pt.append(0.2 * p[0] + 0.35 * p[3] + 0.05 * p[6] + 0.05 * p[7] + 0.15 * p[8] + 0.2 * p[23])
-    pt.append(0.5 * p[5] + 0.3 * p[9] + 0.1 * p[12] + 0.05 * p[13] + 0.05 * p[14])
-    pt.append(0.1 * p[2] + 0.2 * p[21] + 0.3 * p[25] + 0.3 * p[26] + 0.1 * p[27])
-    pt.append(0.05 * p[16] + 0.25 * p[17] + 0.5 * p[18] + 0.2 * p[20])
+    pt = [0.45 * p[10] + 0.55 * p[11],
+          0.45 * p[1] + 0.05 * p[4] + 0.2 * p[15] + 0.2 * p[19] + 0.05 * p[22] + 0.05 * p[24],
+          0.2 * p[0] + 0.35 * p[3] + 0.05 * p[6] + 0.05 * p[7] + 0.15 * p[8] + 0.2 * p[23],
+          0.5 * p[5] + 0.3 * p[9] + 0.1 * p[12] + 0.05 * p[13] + 0.05 * p[14],
+          0.1 * p[2] + 0.2 * p[21] + 0.3 * p[25] + 0.3 * p[26] + 0.1 * p[27],
+          0.05 * p[16] + 0.25 * p[17] + 0.5 * p[18] + 0.2 * p[20]]
     if do_round:
         for i in range(6):
             pt[i] = int(round(pt[i]))

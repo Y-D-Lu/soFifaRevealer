@@ -1,5 +1,7 @@
 import time
 
+import itertools
+
 from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender, df_calc
 
 # attr to calc, 33d without Composure
@@ -138,7 +140,7 @@ def starting_eleven(p, fm=form['433FLAT']):
         dictc[tp['ID'].iloc[0]].append('DM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaDM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
-        
+
     # fit for CM
     for i in range(fm['CM']):
         tp = df_calc(tm).sort_values('ovaCM', ascending=False)
@@ -146,7 +148,7 @@ def starting_eleven(p, fm=form['433FLAT']):
         dictc[tp['ID'].iloc[0]].append('CM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaCM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
-        
+
     # fit for WM
     for i in range(fm['WM']):
         tp = df_calc(tm).sort_values('ovaWM', ascending=False)
@@ -154,7 +156,7 @@ def starting_eleven(p, fm=form['433FLAT']):
         dictc[tp['ID'].iloc[0]].append('WM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaWM'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
-        
+
     # fit for AM
     for i in range(fm['AM']):
         tp = df_calc(tm).sort_values('ovaAM', ascending=False)
@@ -170,7 +172,7 @@ def starting_eleven(p, fm=form['433FLAT']):
         dictc[tp['ID'].iloc[0]].append('WW')
         dictc[tp['ID'].iloc[0]].append(tp['ovaWW'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
-        
+
     # fit for CF
     for i in range(fm['CF']):
         tp = df_calc(tm).sort_values('ovaCF', ascending=False)
@@ -186,7 +188,98 @@ def starting_eleven(p, fm=form['433FLAT']):
         dictc[tp['ID'].iloc[0]].append('ST')
         dictc[tp['ID'].iloc[0]].append(tp['ovaST'].iloc[0])
         tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
-        
+
+    return dictc
+
+
+# determine the fine starting eleven for team
+# in put a team, thus select_club/nation(data,'club/nation')
+def best_eleven(p, fm=form['433FLAT']):
+    tm = p
+    dictc = {}
+
+    # fit for GK
+    for i in range(fm['GK']):
+        tp = df_calc(tm).sort_values('ovaGK', ascending=False)
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+        dictc[tp['ID'].iloc[0]].append('GK')
+        dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+
+    # first check for the FBs, because they are easier to determine
+    for i in range(fm['FB']):
+        tp = df_calc(tm).sort_values('ovaFB', ascending=False)
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+        dictc[tp['ID'].iloc[0]].append('FB')
+        dictc[tp['ID'].iloc[0]].append(tp['ovaFB'].iloc[0])
+        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+
+    # WB is the same, won't be with FBs in any form
+    for i in range(fm['WB']):
+        tp = df_calc(tm).sort_values('ovaWB', ascending=False)
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+        dictc[tp['ID'].iloc[0]].append('WB')
+        dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
+        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+
+    # then CBs
+    for i in range(fm['CB']):
+        tp = df_calc(tm).sort_values('ovaCB', ascending=False)
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+        dictc[tp['ID'].iloc[0]].append('CB')
+        dictc[tp['ID'].iloc[0]].append(tp['ovaCB'].iloc[0])
+        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+
+    # well... if there's DM in the formation, it's hard to say. Emmm... Assume that the best player of you is an Am,
+    # it may gets higher point than your DMs, he may be send to the DM by greedy algorithm.
+    # so we just use a strategy that might be of some stupid: calc it all and we can know how to combine the best
+    # it's really time-costing but, emmm... really exact.
+    dict_pos=fm
+    dict_pos.pop('GK')
+    dict_pos.pop('FB')
+    dict_pos.pop('WB')
+    dict_pos.pop('CB')
+    p_list = tm.sort_values('ova', ascending=False).iloc[0:8]
+    name_list=set(p_list['ID'].values)
+    a=0
+    # first try 3cm 3cf
+    ova = []
+    form=[]
+    for dm in itertools.permutations(name_list, dict_pos['DM']):
+        rest1 = name_list.difference(dm)
+        ovaDM=df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
+        for cm in itertools.permutations(rest1, dict_pos['CM']):
+            rest2 = rest1.difference(cm)
+            ovaCM = df_calc(p_list[p_list['ID'].isin(cm)])['ovaCM'].sum()
+            for wm in itertools.permutations(rest2, dict_pos['WM']):
+                rest3 = rest2.difference(wm)
+                ovaWM = df_calc(p_list[p_list['ID'].isin(wm)])['ovaWM'].sum()
+                for am in itertools.permutations(rest3, dict_pos['AM']):
+                    rest4 = rest3.difference(am)
+                    ovaAM = df_calc(p_list[p_list['ID'].isin(am)])['ovaAM'].sum()
+                    for ww in itertools.permutations(rest4, dict_pos['WW']):
+                        rest5 = rest4.difference(ww)
+                        ovaWW = df_calc(p_list[p_list['ID'].isin(ww)])['ovaWW'].sum()
+                        for cf in itertools.permutations(rest5, dict_pos['CF']):
+                            rest6 = rest5.difference(cf)
+                            ovaCF = df_calc(p_list[p_list['ID'].isin(cf)])['ovaCF'].sum()
+                            for st in itertools.permutations(rest6, dict_pos['ST']):
+                                ovaST = df_calc(p_list[p_list['ID'].isin(st)])['ovaST'].sum()
+                                ova_sum = ovaDM + ovaCM + ovaWM +ovaAM + ovaWW + ovaCF + ovaST
+                                form.append(dm+cm+wm+am+ww+cf+st)
+                                ova.append(ova_sum)
+                                a+=1
+    # print(ova[ova.index(max(ova))])
+    print(a)
+    pos_order=[]
+    for k in dict_pos:
+        for num in range(dict_pos[k]):
+            pos_order.append(k)
+    for players in list(form[ova.index(max(ova))]):
+        dictc[players]=[p_list[p_list['ID']==players]['Name'].values[0]]
+        pos=pos_order[list(form[ova.index(max(ova))]).index(players)]
+        dictc[players].append(pos)
+        dictc[players].append(calc(p_list[p_list['ID']==players],False)[pos])
     return dictc
 
 

@@ -273,38 +273,38 @@ def starting_eleven(p, fm=form['433FLAT']):
 def best_eleven(p, fm=form['433FLAT']):
     tm = p
     dictc = {}
+    df = df_calc(tm)
+    # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
+    tp = df.sort_values('ovaGK', ascending=False)
+    dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+    dictc[tp['ID'].iloc[0]].append('GK')
+    dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+    tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-    # fit for GK
-    for i in range(fm['GK']):
-        tp = df_calc(tm).sort_values('ovaGK', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('GK')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+    # fit for WB
+    if fm['WB'] == 2:
+        for i in range(fm['WB']):
+            tp = tp.sort_values('ovaWB', ascending=False)
+            dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+            dictc[tp['ID'].iloc[0]].append('WB')
+            dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
+            tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-    # first check for the FBs, because they are easier to determine
+    # fit for FB
     for i in range(fm['FB']):
-        tp = df_calc(tm).sort_values('ovaFB', ascending=False)
+        tp = tp.sort_values('ovaFB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('FB')
         dictc[tp['ID'].iloc[0]].append(tp['ovaFB'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-    # WB is the same, won't be with FBs in any form
-    for i in range(fm['WB']):
-        tp = df_calc(tm).sort_values('ovaWB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('WB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
-
-    # then CBs
+    # fit for CB
     for i in range(fm['CB']):
-        tp = df_calc(tm).sort_values('ovaCB', ascending=False)
+        tp = tp.sort_values('ovaCB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CB')
         dictc[tp['ID'].iloc[0]].append(tp['ovaCB'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # well... if there's DM in the formation, it's hard to say. Emmm... Assume that the best player of you is an Am,
     # it may gets higher point than your DMs, he may be send to the DM by greedy algorithm.

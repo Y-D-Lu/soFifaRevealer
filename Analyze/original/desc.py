@@ -176,93 +176,94 @@ def similar(p=[], tid=41, num=10):
 def starting_eleven(p, fm=form['433FLAT']):
     tm = p
     dictc = {}
-
+    df=df_calc(tm)
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
-    tp = df_calc(tm).sort_values('ovaGK', ascending=False)
+    tp = df.sort_values('ovaGK', ascending=False)
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
     dictc[tp['ID'].iloc[0]].append('GK')
     dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
-    tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+    tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WB
-    for i in range(fm['WB']):
-        tp = df_calc(tm).sort_values('ovaWB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('WB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+    if fm['WB']==2:
+        for i in range(fm['WB']):
+            tp = tp.sort_values('ovaWB', ascending=False)
+            dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+            dictc[tp['ID'].iloc[0]].append('WB')
+            dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
+            tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for FB
     for i in range(fm['FB']):
-        tp = df_calc(tm).sort_values('ovaFB', ascending=False)
+        tp = tp.sort_values('ovaFB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('FB')
         dictc[tp['ID'].iloc[0]].append(tp['ovaFB'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CB
     for i in range(fm['CB']):
-        tp = df_calc(tm).sort_values('ovaCB', ascending=False)
+        tp = tp.sort_values('ovaCB', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CB')
         dictc[tp['ID'].iloc[0]].append(tp['ovaCB'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for DM
     for i in range(fm['DM']):
-        tp = df_calc(tm).sort_values('ovaDM', ascending=False)
+        tp = tp.sort_values('ovaDM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('DM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaDM'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CM
     for i in range(fm['CM']):
-        tp = df_calc(tm).sort_values('ovaCM', ascending=False)
+        tp = tp.sort_values('ovaCM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaCM'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WM
     for i in range(fm['WM']):
-        tp = df_calc(tm).sort_values('ovaWM', ascending=False)
+        tp = tp.sort_values('ovaWM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('WM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaWM'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for AM
     for i in range(fm['AM']):
-        tp = df_calc(tm).sort_values('ovaAM', ascending=False)
+        tp = tp.sort_values('ovaAM', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('AM')
         dictc[tp['ID'].iloc[0]].append(tp['ovaAM'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-        # fit for WW
+    # fit for WW
     for i in range(fm['WW']):
-        tp = df_calc(tm).sort_values('ovaWW', ascending=False)
+        tp = tp.sort_values('ovaWW', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('WW')
         dictc[tp['ID'].iloc[0]].append(tp['ovaWW'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CF
     for i in range(fm['CF']):
-        tp = df_calc(tm).sort_values('ovaCF', ascending=False)
+        tp = tp.sort_values('ovaCF', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('CF')
         dictc[tp['ID'].iloc[0]].append(tp['ovaCF'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for ST
     for i in range(fm['ST']):
-        tp = df_calc(tm).sort_values('ovaST', ascending=False)
+        tp = tp.sort_values('ovaST', ascending=False)
         dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
         dictc[tp['ID'].iloc[0]].append('ST')
         dictc[tp['ID'].iloc[0]].append(tp['ovaST'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     return dictc
 

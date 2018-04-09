@@ -174,9 +174,8 @@ def similar(p=[], tid=41, num=10):
 # determine the fine starting eleven for team
 # in put a team, thus select_club/nation(data,'club/nation')
 def starting_eleven(p, fm=form['433FLAT']):
-    tm = p
     dictc = {}
-    df=df_calc(tm)
+    df=df_calc(p)
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
     tp = df.sort_values('ovaGK', ascending=False)
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
@@ -271,9 +270,8 @@ def starting_eleven(p, fm=form['433FLAT']):
 # determine the best starting eleven for team
 # in put a team, thus select_club/nation(data,'club/nation')
 def best_eleven(p, fm=form['433FLAT']):
-    tm = p
     dictc = {}
-    df = df_calc(tm)
+    df = df_calc(p)
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
     tp = df.sort_values('ovaGK', ascending=False)
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
@@ -315,7 +313,7 @@ def best_eleven(p, fm=form['433FLAT']):
     dict_pos.pop('FB')
     dict_pos.pop('WB')
     dict_pos.pop('CB')
-    p_list = tm.sort_values('ova', ascending=False).iloc[0:8]
+    p_list = tp.sort_values('ova', ascending=False).iloc[0:8]
     name_list = set(p_list['ID'].values)
     a = 0
     # first try 3cm 3cf

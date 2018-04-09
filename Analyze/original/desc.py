@@ -3,7 +3,6 @@ import time
 import itertools
 
 from scipy.spatial.distance import pdist, squareform
-from sklearn.decomposition import PCA
 
 from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender, df_calc
 
@@ -18,6 +17,7 @@ alla = [
     'GK_Diving', 'GK_Handling', 'GK_Kicking', 'GK_Positioning', 'GK_Reflexes'
 ]
 
+# all forms that in FIFA18, XD I manually write them all.
 form = {
     '451ATTACK': {'GK': 1, 'FB': 2, 'WB': 0, 'CB': 2, 'DM': 0, 'CM': 1, 'WM': 2, 'AM': 2, 'WW': 0, 'CF': 0, 'ST': 1},
     '4141': {'GK': 1, 'FB': 2, 'WB': 0, 'CB': 2, 'DM': 1, 'CM': 2, 'WM': 2, 'AM': 0, 'WW': 0, 'CF': 0, 'ST': 1},
@@ -54,53 +54,61 @@ form = {
     '343DIAMOND': {'GK': 1, 'FB': 0, 'WB': 0, 'CB': 3, 'DM': 1, 'CM': 0, 'WM': 2, 'AM': 1, 'WW': 2, 'CF': 0, 'ST': 1}
 }
 
-# WingBack
+# the attr that related with WingBack
 WB = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Interceptions', 'Ball_Control', 'Crossing',
       'Dribbling', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
-# FullBack
+# the attr that related with FullBack
 FB = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Interceptions', 'Ball_Control', 'Crossing',
       'Heading_Accuracy', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
-# CenterBack
+# the attr that related with CenterBack
 CB = ['Sprint_Speed', 'Jumping', 'Strength', 'Reactions', 'Aggression', 'Interceptions', 'Ball_Control',
       'Heading_Accuracy', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
-# DefenceMidfield
+# the attr that related with DefenceMidfield
 DM = ['Stamina', 'Strength', 'Reactions', 'Aggression', 'Interceptions', 'Vision', 'Ball_Control',
       'Long_Passing', 'Short_Passing', 'Marking', 'Standing_Tackle', 'Sliding_Tackle']
-# WingMidfield
+# the attrs that related with WingMidfield
 WM = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Positioning', 'Vision', 'Ball_Control',
       'Crossing', 'Dribbling', 'Finishing', 'Long_Passing', 'Short_Passing']
-# CenterMidfield
+# the attr that related with CenterMidfield
 CM = ['Stamina', 'Reactions', 'Interceptions', 'Positioning', 'Vision', 'Ball_Control', 'Dribbling',
       'Finishing', 'Long_Passing', 'Short_Passing', 'Long_Shots', 'Standing_Tackle']
+# the attr that related with AttackMidfield
 AM = ['Acceleration', 'Sprint_Speed', 'Agility', 'Reactions', 'Positioning', 'Vision', 'Ball_Control',
       'Dribbling', 'Finishing', 'Long_Passing', 'Short_Passing', 'Long_Shots']
-# CenterForward
+# the attr that related with CenterForward
 CF = ['Acceleration', 'Sprint_Speed', 'Reactions', 'Positioning', 'Vision', 'Ball_Control', 'Dribbling',
       'Finishing', 'Heading_Accuracy', 'Short_Passing', 'Shot_Power', 'Long_Shots']
-# Winger
+# the attr that related with Winger
 WW = ['Acceleration', 'Sprint_Speed', 'Agility', 'Reactions', 'Positioning', 'Vision', 'Ball_Control', 'Crossing',
       'Dribbling', 'Finishing', 'Short_Passing', 'Long_Shots']
-# Striker
+# the attr that related with Striker
 ST = ['Acceleration', 'Sprint_Speed', 'Strength', 'Reactions', 'Positioning', 'Ball_Control', 'Dribbling',
       'Finishing', 'Heading_Accuracy', 'Short_Passing', 'Shot_Power', 'Long_Shots', 'Volleys']
 
 
-# select top players
+# select top players, input the df contains the target players, condition you want to compare with ,
+# and the top percentage you want, output the players' info's df
 def select_top(p, cond='ova', percentage=0.1):
     pt = p[p[cond] > p[cond].describe(percentiles=[1 - percentage / 100])[5]].sort_values(cond, ascending=False)
     return pt
 
 
-# select rank of attr of a player
+# select rank of attr of a player, input the df contains the target player, the  id of the target player,
+# and condition you want to compare, output the target player's rank of the condition
 def select_rank(p, pid=41, cond='ova'):
+    # firstly sort by condition given
     sort = p.sort_values(cond, ascending=False)
+    # then get the player's rank
     rk = sort[cond].rank(ascending=False, method='min')[sort[sort['ID'] == pid][cond].index[0]]
     return int(rk)
 
 
-# determine best position for a player, a slice of a player
+# determine best position for a player, input a slice of a player, thus df[alla].iloc[0, :]
+# output the position at which the player get the highest OVA as string.
 def best_pos(p):
+    # get dict of pos
     calc_dict = calc(p, False)
+    # get key whose value is the max one
     pos = max(calc_dict, key=calc_dict.get)
     return pos
 
@@ -108,7 +116,7 @@ def best_pos(p):
 # select the top player for the field
 # at a extremely low effect, takes days and hours to do an analyze
 # never use it unless the input is at a very low num
-def top_pos(p, pos='CM', num=1):
+def top_pos(p, pos='CM'):
     p = p.copy()
     p['point' + pos] = p['ova']
     for i in range(p['ID'].count()):
@@ -136,10 +144,11 @@ def similar(p=[], tid=41, num=10):
     pid = p['ID']
     name = p['Name']
 
-    target = 0
     dis = []
     IDs = []
     Names = []
+
+    # get distance among players
     player_dis = pdist(player_s, 'euclidean')
     player_dis = squareform(player_dis)
 
@@ -168,12 +177,12 @@ def starting_eleven(p, fm=form['433FLAT']):
     tm = p
     dictc = {}
 
-    for i in range(fm['GK']):
-        tp = df_calc(tm).sort_values('ovaGK', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('GK')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
-        tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
+    # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
+    tp = df_calc(tm).sort_values('ovaGK', ascending=False)
+    dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
+    dictc[tp['ID'].iloc[0]].append('GK')
+    dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+    tm = tm.drop(tm[tm['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WB
     for i in range(fm['WB']):
@@ -258,7 +267,7 @@ def starting_eleven(p, fm=form['433FLAT']):
     return dictc
 
 
-# determine the fine starting eleven for team
+# determine the best starting eleven for team
 # in put a team, thus select_club/nation(data,'club/nation')
 def best_eleven(p, fm=form['433FLAT']):
     tm = p

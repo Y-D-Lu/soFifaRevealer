@@ -90,13 +90,13 @@ def top_pos(p, pos='CM'):
 
 
 # select players with the same team
-def select_team(p, club='FC Barcelona'):
+def select_team(p, club='Arsenal'):
     mates = p[p['Club'] == club]
     return mates
 
 
 # select players with the same nation
-def select_nation(p, nation='Spain'):
+def select_nation(p, nation='China PR'):
     mates = p[p['Nation'] == nation]
     return mates
 

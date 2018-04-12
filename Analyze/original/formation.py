@@ -186,13 +186,13 @@ def better_eleven(p, fm=form['433FLAT'], add=1.5):
     a = 0
     ova = []
     form_list = []
-    for ww in itertools.permutations(name_list, dict_pos['WW']):
+    for ww in itertools.combinations(name_list, dict_pos['WW']):
         rest1 = name_list.difference(ww)
         ovaWW = df_calc(p_list[p_list['ID'].isin(ww)])['ovaWW'].sum()
-        for cf in itertools.permutations(rest1, dict_pos['CF']):
+        for cf in itertools.combinations(rest1, dict_pos['CF']):
             rest2 = rest1.difference(cf)
             ovaCF = df_calc(p_list[p_list['ID'].isin(cf)])['ovaCF'].sum()
-            for st in itertools.permutations(rest2, dict_pos['ST']):
+            for st in itertools.combinations(rest2, dict_pos['ST']):
                 ovaST = df_calc(p_list[p_list['ID'].isin(st)])['ovaST'].sum()
                 ova_sum = ovaWW + ovaCF + ovaST
                 form_list.append(ww + cf + st)
@@ -224,16 +224,16 @@ def better_eleven(p, fm=form['433FLAT'], add=1.5):
     a = 0
     ova = []
     form_list = []
-    for dm in itertools.permutations(name_list, dict_pos['DM']):
+    for dm in itertools.combinations(name_list, dict_pos['DM']):
         rest1 = name_list.difference(dm)
         ovaDM = df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
-        for cm in itertools.permutations(rest1, dict_pos['CM']):
+        for cm in itertools.combinations(rest1, dict_pos['CM']):
             rest2 = rest1.difference(cm)
             ovaCM = df_calc(p_list[p_list['ID'].isin(cm)])['ovaCM'].sum()
-            for wm in itertools.permutations(rest2, dict_pos['WM']):
+            for wm in itertools.combinations(rest2, dict_pos['WM']):
                 rest3 = rest2.difference(wm)
                 ovaWM = df_calc(p_list[p_list['ID'].isin(wm)])['ovaWM'].sum()
-                for am in itertools.permutations(rest3, dict_pos['AM']):
+                for am in itertools.combinations(rest3, dict_pos['AM']):
                     ovaAM = df_calc(p_list[p_list['ID'].isin(am)])['ovaAM'].sum()
                     ova_sum = ovaDM + ovaCM + ovaWM + ovaAM
                     form_list.append(dm + cm + wm + am)
@@ -264,7 +264,6 @@ def best_eleven(p, fm=form['433FLAT']):
     dictc[tp['ID'].iloc[0]].append('GK')
     dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
-    print(fm)
     # fit for WB
     for i in range(fm['WB']):
         tp = tp.sort_values('ovaWB', ascending=False)
@@ -306,32 +305,32 @@ def best_eleven(p, fm=form['433FLAT']):
     # first try 3cm 3cf
     ova = []
     form_list = []
-    for dm in itertools.permutations(name_list, dict_pos['DM']):
+    for dm in itertools.combinations(name_list, dict_pos['DM']):
         rest1 = name_list.difference(dm)
         ovaDM = df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
-        for cm in itertools.permutations(rest1, dict_pos['CM']):
+        for cm in itertools.combinations(rest1, dict_pos['CM']):
             rest2 = rest1.difference(cm)
             ovaCM = df_calc(p_list[p_list['ID'].isin(cm)])['ovaCM'].sum()
-            for wm in itertools.permutations(rest2, dict_pos['WM']):
+            for wm in itertools.combinations(rest2, dict_pos['WM']):
                 rest3 = rest2.difference(wm)
                 ovaWM = df_calc(p_list[p_list['ID'].isin(wm)])['ovaWM'].sum()
-                for am in itertools.permutations(rest3, dict_pos['AM']):
+                for am in itertools.combinations(rest3, dict_pos['AM']):
                     rest4 = rest3.difference(am)
                     ovaAM = df_calc(p_list[p_list['ID'].isin(am)])['ovaAM'].sum()
-                    for ww in itertools.permutations(rest4, dict_pos['WW']):
+                    for ww in itertools.combinations(rest4, dict_pos['WW']):
                         rest5 = rest4.difference(ww)
                         ovaWW = df_calc(p_list[p_list['ID'].isin(ww)])['ovaWW'].sum()
-                        for cf in itertools.permutations(rest5, dict_pos['CF']):
+                        for cf in itertools.combinations(rest5, dict_pos['CF']):
                             rest6 = rest5.difference(cf)
                             ovaCF = df_calc(p_list[p_list['ID'].isin(cf)])['ovaCF'].sum()
-                            for st in itertools.permutations(rest6, dict_pos['ST']):
+                            for st in itertools.combinations(rest6, dict_pos['ST']):
                                 ovaST = df_calc(p_list[p_list['ID'].isin(st)])['ovaST'].sum()
                                 ova_sum = ovaDM + ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
                                 form_list.append(dm + cm + wm + am + ww + cf + st)
                                 ova.append(ova_sum)
                                 a += 1
     # print(ova[ova.index(max(ova))])
-    print(a)
+    # print(a)
     pos_order = []
     for k in dict_pos:
         for num in range(dict_pos[k]):

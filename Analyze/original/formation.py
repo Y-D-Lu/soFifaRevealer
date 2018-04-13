@@ -1,4 +1,6 @@
 import copy
+import time
+
 import itertools
 
 from Analyze.point_calc import df_calc, calc
@@ -182,11 +184,11 @@ def best_eleven(p, fm=form['433FLAT']):
     dict_pos.pop('WB')
     dict_pos.pop('CB')
     # 8 is enough for a team, for example, the 8th or barca is A.Gomes, so might be enough.
-    # the Time Complexity now is of O(n!), so, it takes about mintue while n=6,about 3 while 8 and over 10 while 8.
+    # the Time Complexity now is of O(n!),
+    # so, it takes about 5s while n=6,about 1min while 8 and about 6min while 10.
     p_list = tp.sort_values('ova', ascending=False).iloc[0:8]
     name_list = set(p_list['ID'].values)
     a = 0
-    # first try 3cm 3cf
     ova = []
     form_list = []
     for dm in itertools.combinations(name_list, dict_pos['DM']):
@@ -229,15 +231,16 @@ def best_eleven(p, fm=form['433FLAT']):
 
 # input some players, such as a club or a nation, you can also input the players you want.
 # output a form makes up the highest ova
-# well... due to using greedy algorithm in the function start_eleven(), the result may not be the best
-# need to be optimized
+# well... using greedy algorithm in the function start_eleven(), the result may not be the best
+# while using the best_eleven(),you may get the best result, but cost much more time.
+# still need to be optimized
 def best_form(p):
     dict_form = {}
     for k in form:
         # print('now '+k)
         # # consume so much time that have to measure it
         # print(time.strftime('%H:%M:%S', time.localtime(time.time())))
-        dictc = starting_eleven(p, fm=form[k])
+        dictc = best_eleven(p, fm=form[k])
         team_ova = 0
         for kc in dictc:
             team_ova += dictc[kc][2]
@@ -248,4 +251,6 @@ def best_form(p):
         ova_list.append(dict_form[k][1])
         key_list.append(k)
     best_fm = key_list[ova_list.index(max(ova_list))]
+
+    # print(best_fm)
     return dict_form[best_fm][0]

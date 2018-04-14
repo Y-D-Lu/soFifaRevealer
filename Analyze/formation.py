@@ -46,9 +46,10 @@ form = {
 
 # determine the fine starting eleven for team
 # in put a team, thus select_club/nation(data,'club/nation')
-def starting_eleven(p, fm=form['433FLAT']):
+def starting_eleven(p, ban_list=[], fm=form['433FLAT']):
     dictc = {}
     df = df_calc(p)
+    df = df.drop(df[df['ID'].isin(ban_list)].index)
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
     tp = df.sort_values('ovaGK', ascending=False)
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
@@ -142,9 +143,10 @@ def starting_eleven(p, fm=form['433FLAT']):
 
 # determine the best starting eleven for team
 # in put a team, thus select_club/nation(data,'club/nation')
-def best_eleven(p, fm=form['433FLAT']):
+def best_eleven(p, ban_list=[], fm=form['433FLAT']):
     dictc = {}
     df = df_calc(p)
+    df = df.drop(df[df['ID'].isin(ban_list)].index)
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
     tp = df.sort_values('ovaGK', ascending=False)
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
@@ -235,13 +237,13 @@ def best_eleven(p, fm=form['433FLAT']):
 # well... using greedy algorithm in the function start_eleven(), the result may not be the best
 # while using the best_eleven(),you may get the best result, but cost much more time.
 # still need to be optimized
-def best_form(p):
+def best_form(p, ban=[]):
     dict_form = {}
     for k in form:
         # print('now '+k)
         # # consume so much time that have to measure it
         # print(time.strftime('%H:%M:%S', time.localtime(time.time())))
-        dictc = best_eleven(p, fm=form[k])
+        dictc = best_eleven(p, ban_list=ban, fm=form[k])
         team_ova = 0
         for kc in dictc:
             team_ova += dictc[kc][2]
@@ -257,9 +259,9 @@ def best_form(p):
     return dict_form[best_fm][0]
 
 
-def multi_form(k, p):
+def multi_form(k, p, ban=[]):
     dict_form = {}
-    dictc = best_eleven(p, fm=form[k])
+    dictc = best_eleven(p, ban_list=ban, fm=form[k])
     team_ova = 0
     for kc in dictc:
         team_ova += dictc[kc][2]
@@ -267,13 +269,13 @@ def multi_form(k, p):
     return dict_form
 
 
-def best_form_multi(p):
+def best_form_multi(p, ban=[]):
     # use a multiprocess to get a 3x speed for calc
     pool = Pool(5)
     res = []
     dict_form = {}
     for k in form:
-        res.append(pool.apply_async(multi_form, args=(k, p)))
+        res.append(pool.apply_async(multi_form, args=(k, p, ban)))
     for i in res:
         dict_form.update(i.get())
     pool.close()

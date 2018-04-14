@@ -2,6 +2,7 @@ import copy
 import time
 
 import itertools
+from multiprocessing.pool import Pool
 
 from Analyze.point_calc import df_calc, calc
 
@@ -252,5 +253,36 @@ def best_form(p):
         key_list.append(k)
     best_fm = key_list[ova_list.index(max(ova_list))]
 
+    # print(best_fm)
+    return dict_form[best_fm][0]
+
+
+def multi_form(k, p):
+    dict_form = {}
+    dictc = best_eleven(p, fm=form[k])
+    team_ova = 0
+    for kc in dictc:
+        team_ova += dictc[kc][2]
+    dict_form[k] = [dictc, team_ova]
+    return dict_form
+
+
+def best_form_multi(p):
+    # use a multiprocess to get a 3x speed for calc
+    pool = Pool(5)
+    res = []
+    dict_form = {}
+    for k in form:
+        res.append(pool.apply_async(multi_form, args=(k, p)))
+    for i in res:
+        dict_form.update(i.get())
+    pool.close()
+    pool.join()
+    ova_list = []
+    key_list = []
+    for k in dict_form:
+        ova_list.append(dict_form[k][1])
+        key_list.append(k)
+    best_fm = key_list[ova_list.index(max(ova_list))]
     # print(best_fm)
     return dict_form[best_fm][0]

@@ -340,12 +340,12 @@ def as_gk(p):
 
 
 # calc six dimension as pointPAC,pointSHO,pointPAS,pointDRI,pointDEF,pointPHY
-# or might pointDIV,pointHAN,pointKIC,pointREF,pointSPD,pointPOS: 
+# or might pointDIV,pointHAN,pointKIC,pointREF,pointSPD,pointPOS:
 # if a player's point of CM is not more than GK, it turns to be a GK, which is already proved.
 def six_d(p, do_round=True):
-    dictp = calc(p)
+    dict_p = calc(p)
     p = p[all_attr].values[0]
-    if dictp['GK'] < dictp['CM']:
+    if dict_p['GK'] < dict_p['CM']:
         pt = [0.45 * p[10] + 0.55 * p[11],
               0.45 * p[1] + 0.05 * p[4] + 0.2 * p[15] + 0.2 * p[19] + 0.05 * p[22] + 0.05 * p[24],
               0.2 * p[0] + 0.35 * p[3] + 0.05 * p[6] + 0.05 * p[7] + 0.15 * p[8] + 0.2 * p[23],
@@ -353,7 +353,7 @@ def six_d(p, do_round=True):
               0.1 * p[2] + 0.2 * p[21] + 0.3 * p[25] + 0.3 * p[26] + 0.1 * p[27],
               0.05 * p[16] + 0.25 * p[17] + 0.5 * p[18] + 0.2 * p[20]]
     else:
-        pt = [p[28], p[29], p[30], p[32], 0.45 * p[10] + 0.55 * p[11], p[31]]
+        pt = [float(p[28]), float(p[29]), float(p[30]), float(p[32]), 0.45 * p[10] + 0.55 * p[11], float(p[31])]
     if do_round:
         return list(map(lambda x: int(round(x)), pt))
     else:

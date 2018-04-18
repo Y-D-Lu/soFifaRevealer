@@ -153,82 +153,76 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
     dictc[tp['ID'].iloc[0]].append('GK')
     dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
-    # fit for WB
-    for i in range(fm['WB']):
-        tp = tp.sort_values('ovaWB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('WB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
-        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-    # fit for FB
-    for i in range(fm['FB']):
-        tp = tp.sort_values('ovaFB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('FB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaFB'].iloc[0])
-        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
-
-    # fit for CB
-    for i in range(fm['CB']):
-        tp = tp.sort_values('ovaCB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('CB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaCB'].iloc[0])
-        tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
-
-    # well... if there's DM in the formation, it's hard to say. Emmm... Assume that the best player of you is an Am,
-    # it may gets higher point than your DMs, he may be send to the DM by greedy algorithm.
-    # so we just use a strategy that might be of some stupid: calc it all and we can know how to combine the best
-    # it's really time-costing but, emmm... really exact.
-    dict_pos = fm
-    dict_pos.pop('GK')
-    dict_pos.pop('FB')
-    dict_pos.pop('WB')
-    dict_pos.pop('CB')
-    # 8 is enough for a team, for example, the 8th or barca is A.Gomes, so might be enough.
-    # the Time Complexity now is of O(n!),
-    # so, it takes about 5s while n=6,about 1min while 8 and about 6min while 10.
-    p_list = tp.sort_values('ova', ascending=False).iloc[0:8]
-    name_list = set(p_list['ID'].values)
-    a = 0
-    ova = []
-    form_list = []
-    for dm in itertools.combinations(name_list, dict_pos['DM']):
-        rest1 = name_list.difference(dm)
-        ovaDM = df_calc(p_list[p_list['ID'].isin(dm)])['ovaDM'].sum()
-        for cm in itertools.combinations(rest1, dict_pos['CM']):
-            rest2 = rest1.difference(cm)
-            ovaCM = df_calc(p_list[p_list['ID'].isin(cm)])['ovaCM'].sum()
-            for wm in itertools.combinations(rest2, dict_pos['WM']):
-                rest3 = rest2.difference(wm)
-                ovaWM = df_calc(p_list[p_list['ID'].isin(wm)])['ovaWM'].sum()
-                for am in itertools.combinations(rest3, dict_pos['AM']):
-                    rest4 = rest3.difference(am)
-                    ovaAM = df_calc(p_list[p_list['ID'].isin(am)])['ovaAM'].sum()
-                    for ww in itertools.combinations(rest4, dict_pos['WW']):
-                        rest5 = rest4.difference(ww)
-                        ovaWW = df_calc(p_list[p_list['ID'].isin(ww)])['ovaWW'].sum()
-                        for cf in itertools.combinations(rest5, dict_pos['CF']):
-                            rest6 = rest5.difference(cf)
-                            ovaCF = df_calc(p_list[p_list['ID'].isin(cf)])['ovaCF'].sum()
-                            for st in itertools.combinations(rest6, dict_pos['ST']):
-                                ovaST = df_calc(p_list[p_list['ID'].isin(st)])['ovaST'].sum()
-                                ova_sum = ovaDM + ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
-                                form_list.append(dm + cm + wm + am + ww + cf + st)
-                                ova.append(ova_sum)
-                                a += 1
-    # print(ova[ova.index(max(ova))])
-    # print(a)
+    p_list=tp[tp['ovaDM']>tp['ovaAM']].sort_values('ova', ascending=False).head(int(round((fm['FB']+fm['WB']+fm['CB']+fm['DM'])*2)))
+    print(p_list)
+    name_set = set(p_list['ID'].values)
+    ova=[]
+    def_list = []
+    for wb in itertools.combinations(name_set, fm['WB']):
+        rest1 = name_set.difference(wb)
+        ovaWB = sum(p_list[p_list['ID'].isin(wb)]['ovaWB'].values)
+        for fb in itertools.combinations(rest1, fm['FB']):
+            rest2 = rest1.difference(fb)
+            ovaFB = sum(p_list[p_list['ID'].isin(fb)]['ovaFB'].values)
+            for cb in itertools.combinations(rest2, fm['CB']):
+                rest3 = rest2.difference(cb)
+                ovaCB = sum(p_list[p_list['ID'].isin(cb)]['ovaCB'].values)
+                for dm in itertools.combinations(rest3, fm['DM']):
+                    ovaDM = sum(p_list[p_list['ID'].isin(dm)]['ovaDM'].values)
+                    ova_sum = ovaWB+ovaFB+ovaCB+ovaDM
+                    def_list.append(wb+fb+cb+dm)
+                    ova.append(ova_sum)
     pos_order = []
-    for k in dict_pos:
-        for num in range(dict_pos[k]):
+    for k in fm:
+        for num in range(fm[k]):
             pos_order.append(k)
-    for players in list(form_list[ova.index(max(ova))]):
-        dictc[players] = [p_list[p_list['ID'] == players]['Name'].values[0]]
-        pos = pos_order[list(form_list[ova.index(max(ova))]).index(players)]
-        dictc[players].append(pos)
-        dictc[players].append(calc(p_list[p_list['ID'] == players], False)[pos])
+    for player in list(def_list[ova.index(max(ova))]):
+        pos = pos_order[list(def_list[ova.index(max(ova))]).index(player)+1]
+        dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
+        dictc[player].append(pos)
+        dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
+        tp = tp.drop(tp[tp['ID']==player].index)
+    p_list = tp[tp['ovaCM'] >= tp['ovaCB']].sort_values('ova', ascending=False).head(
+        int((fm['CM'] + fm['WM'] + fm['AM'] + fm['CF'] + fm['WW'] + fm['ST']) * 1.5))
+    print(p_list)
+    name_set = set(p_list['ID'].values)
+    ova = []
+    att_list = []
+    ova_temp=0
+    for cm in itertools.combinations(name_set, fm['CM']):
+        rest2 = name_set.difference(cm)
+        ovaCM = sum(p_list[p_list['ID'].isin(cm)]['ovaCM'].values)
+        for wm in itertools.combinations(rest2, fm['WM']):
+            rest3 = rest2.difference(wm)
+            ovaWM = sum(p_list[p_list['ID'].isin(wm)]['ovaWM'].values)
+            for am in itertools.combinations(rest3, fm['AM']):
+                rest4 = rest3.difference(am)
+                ovaAM = sum(p_list[p_list['ID'].isin(am)]['ovaAM'].values)
+                for ww in itertools.combinations(rest4, fm['WW']):
+                    rest5 = rest4.difference(ww)
+                    ovaWW = sum(p_list[p_list['ID'].isin(ww)]['ovaWW'].values)
+                    for cf in itertools.combinations(rest5, fm['CF']):
+                        rest6 = rest5.difference(cf)
+                        ovaCF = sum(p_list[p_list['ID'].isin(cf)]['ovaCF'].values)
+                        for st in itertools.combinations(rest6, fm['ST']):
+                            ovaST = sum(p_list[p_list['ID'].isin(st)]['ovaST'].values)
+                            ova_sum =  ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
+                            if ova_sum>ova_temp:
+                                ova_temp=ova_sum
+                                att_list.append( cm + wm + am + ww + cf + st)
+                                ova.append(ova_sum)
+
+    pos_order = []
+    for k in fm:
+        for num in range(fm[k]):
+            pos_order.append(k)
+    for player in list(att_list[ova.index(max(ova))]):
+        pos = pos_order[list(att_list[ova.index(max(ova))]).index(player)+(fm['FB']+fm['WB']+fm['CB']+fm['DM']+1)]
+        dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
+        dictc[player].append(pos)
+        dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
+        
     return dictc
 
 
@@ -237,13 +231,13 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
 # well... using greedy algorithm in the function start_eleven(), the result may not be the best
 # while using the best_eleven(),you may get the best result, but cost much more time.
 # still need to be optimized
-def best_form(p, ban=[]):
+def best_form(p, ban_list=[]):
     dict_form = {}
     for k in form:
         # print('now '+k)
         # # consume so much time that have to measure it
         # print(time.strftime('%H:%M:%S', time.localtime(time.time())))
-        dictc = best_eleven(p, ban_list=ban, fm=form[k])
+        dictc = best_eleven(p, ban_list=ban_list, fm=form[k])
         team_ova = 0
         for kc in dictc:
             team_ova += dictc[kc][2]
@@ -269,13 +263,13 @@ def multi_form(k, p, ban=[]):
     return dict_form
 
 
-def best_form_multi(p, ban=[]):
+def best_form_multi(p, ban_list=[]):
     # use a multiprocess to get a 3x speed for calc
     pool = Pool(5)
     res = []
     dict_form = {}
     for k in form:
-        res.append(pool.apply_async(multi_form, args=(k, p, ban)))
+        res.append(pool.apply_async(multi_form, args=(k, p, ban_list)))
     for i in res:
         dict_form.update(i.get())
     pool.close()
@@ -286,5 +280,4 @@ def best_form_multi(p, ban=[]):
         ova_list.append(dict_form[k][1])
         key_list.append(k)
     best_fm = key_list[ova_list.index(max(ova_list))]
-    # print(best_fm)
     return dict_form[best_fm][0]

@@ -154,10 +154,10 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
     dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-    p_list=tp[tp['ovaDM']>tp['ovaAM']].sort_values('ova', ascending=False).head(int(round((fm['FB']+fm['WB']+fm['CB']+fm['DM'])*2)))
-    print(p_list)
+    p_list = tp[tp['ovaDM'] > tp['ovaAM']].sort_values('ova', ascending=False).head(
+        int(round((fm['FB'] + fm['WB'] + fm['CB'] + fm['DM']) * 2)))
     name_set = set(p_list['ID'].values)
-    ova=[]
+    ova = []
     def_list = []
     for wb in itertools.combinations(name_set, fm['WB']):
         rest1 = name_set.difference(wb)
@@ -170,26 +170,25 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
                 ovaCB = sum(p_list[p_list['ID'].isin(cb)]['ovaCB'].values)
                 for dm in itertools.combinations(rest3, fm['DM']):
                     ovaDM = sum(p_list[p_list['ID'].isin(dm)]['ovaDM'].values)
-                    ova_sum = ovaWB+ovaFB+ovaCB+ovaDM
-                    def_list.append(wb+fb+cb+dm)
+                    ova_sum = ovaWB + ovaFB + ovaCB + ovaDM
+                    def_list.append(wb + fb + cb + dm)
                     ova.append(ova_sum)
     pos_order = []
     for k in fm:
         for num in range(fm[k]):
             pos_order.append(k)
     for player in list(def_list[ova.index(max(ova))]):
-        pos = pos_order[list(def_list[ova.index(max(ova))]).index(player)+1]
+        pos = pos_order[list(def_list[ova.index(max(ova))]).index(player) + 1]
         dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
         dictc[player].append(pos)
         dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
-        tp = tp.drop(tp[tp['ID']==player].index)
+        tp = tp.drop(tp[tp['ID'] == player].index)
     p_list = tp[tp['ovaCM'] >= tp['ovaCB']].sort_values('ova', ascending=False).head(
         int((fm['CM'] + fm['WM'] + fm['AM'] + fm['CF'] + fm['WW'] + fm['ST']) * 1.5))
-    print(p_list)
     name_set = set(p_list['ID'].values)
     ova = []
     att_list = []
-    ova_temp=0
+    ova_temp = 0
     for cm in itertools.combinations(name_set, fm['CM']):
         rest2 = name_set.difference(cm)
         ovaCM = sum(p_list[p_list['ID'].isin(cm)]['ovaCM'].values)
@@ -207,10 +206,10 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
                         ovaCF = sum(p_list[p_list['ID'].isin(cf)]['ovaCF'].values)
                         for st in itertools.combinations(rest6, fm['ST']):
                             ovaST = sum(p_list[p_list['ID'].isin(st)]['ovaST'].values)
-                            ova_sum =  ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
-                            if ova_sum>ova_temp:
-                                ova_temp=ova_sum
-                                att_list.append( cm + wm + am + ww + cf + st)
+                            ova_sum = ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
+                            if ova_sum > ova_temp:
+                                ova_temp = ova_sum
+                                att_list.append(cm + wm + am + ww + cf + st)
                                 ova.append(ova_sum)
 
     pos_order = []
@@ -218,11 +217,12 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
         for num in range(fm[k]):
             pos_order.append(k)
     for player in list(att_list[ova.index(max(ova))]):
-        pos = pos_order[list(att_list[ova.index(max(ova))]).index(player)+(fm['FB']+fm['WB']+fm['CB']+fm['DM']+1)]
+        pos = pos_order[
+            list(att_list[ova.index(max(ova))]).index(player) + (fm['FB'] + fm['WB'] + fm['CB'] + fm['DM'] + 1)]
         dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
         dictc[player].append(pos)
         dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
-        
+
     return dictc
 
 
@@ -248,9 +248,8 @@ def best_form(p, ban_list=[]):
         ova_list.append(dict_form[k][1])
         key_list.append(k)
     best_fm = key_list[ova_list.index(max(ova_list))]
-
-    # print(best_fm)
-    return dict_form[best_fm][0]
+    ret = {best_fm: dict_form[best_fm][0]}
+    return ret
 
 
 def multi_form(k, p, ban=[]):
@@ -280,4 +279,6 @@ def best_form_multi(p, ban_list=[]):
         ova_list.append(dict_form[k][1])
         key_list.append(k)
     best_fm = key_list[ova_list.index(max(ova_list))]
-    return dict_form[best_fm][0]
+    # return [best_fm,max(ova_list)]
+    ret = {best_fm: dict_form[best_fm][0]}
+    return ret

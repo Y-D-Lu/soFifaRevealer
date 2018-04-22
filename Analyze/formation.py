@@ -1,9 +1,5 @@
-import copy
-import time
-
 import itertools
 from multiprocessing.pool import Pool
-
 from Analyze.point_calc import df_calc, calc
 
 # all forms that in FIFA18, XD I manually write them all.
@@ -45,16 +41,28 @@ form = {
 
 
 # determine the fine starting eleven for team
+# is at a high speed, but accuracy may not be so good for giants
 # in put a team, thus select_club/nation(data,'club/nation')
-def starting_eleven(p, ban_list=[], fm=form['433FLAT']):
+def starting_eleven(p, ban_list=None, fm=form['433FLAT']):
+    # the dict to  store the players of the form
+    if ban_list is None:
+        ban_list = []
     dictc = {}
+
+    # firstly drop players in the ban_list
+    p = p.drop(p[p['ID'].isin(ban_list)].index)
+
+    # then calc the ova at all positions for all the players
     df = df_calc(p)
-    df = df.drop(df[df['ID'].isin(ban_list)].index)
+
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
+    # so select the player with the highest GK point
     tp = df.sort_values('ovaGK', ascending=False)
+    # save to the dict as {ID:[Name,Position,ova]}
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
     dictc[tp['ID'].iloc[0]].append('GK')
     dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+    # remove the player selected
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WB
@@ -138,27 +146,50 @@ def starting_eleven(p, ban_list=[], fm=form['433FLAT']):
         dictc[tp['ID'].iloc[0]].append(tp['ovaST'].iloc[0])
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
+    # return the dict
     return dictc
 
 
 # determine the best starting eleven for team
+# cost more time, but accuracy is graet
 # in put a team, thus select_club/nation(data,'club/nation')
-def best_eleven(p, ban_list=[], fm=form['433FLAT']):
+def best_eleven(p, ban_list=None, fm=form['433FLAT']):
+    # the dict to  store the players of the form
+    if ban_list is None:
+        ban_list = []
     dictc = {}
+
+    # firstly drop players in the ban_list
+    p = p.drop(p[p['ID'].isin(ban_list)].index)
+
+    # then calc the ova at all positions for all the players
     df = df_calc(p)
-    df = df.drop(df[df['ID'].isin(ban_list)].index)
+
     # it's undoubtedly that starting GK is the best GK in the form, and there's only one GK
+    # so select the player with the highest GK point
     tp = df.sort_values('ovaGK', ascending=False)
+    # save to the dict as {ID:[Name,Position,ova]}
     dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
     dictc[tp['ID'].iloc[0]].append('GK')
     dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+    # remove the player selected
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
-    p_list = tp[tp['ovaDM'] > tp['ovaAM']].sort_values('ova', ascending=False).head(
+    # as for the rest players, firstly fit for the defenders
+    # if a player performs better at DM than AM, we believe he is a defender than an attacker. And select them.
+    p_list = tp[tp['ovaDM'] > tp['ovaAM']].sort_values('ova', ascending=False
+                                                       # and to be effective, just select 2 times of actually defenders
+                                                       # for we are going to use a way in low effect to calc
+                                                       ).head(
         int(round((fm['FB'] + fm['WB'] + fm['CB'] + fm['DM']) * 2)))
+
+    # get the set of players above for the combinations calc
     name_set = set(p_list['ID'].values)
+    # lists to record ova and defenders
     ova = []
     def_list = []
+
+    # then, get all combinations and append ova and set of IDs to the lists above
     for wb in itertools.combinations(name_set, fm['WB']):
         rest1 = name_set.difference(wb)
         ovaWB = sum(p_list[p_list['ID'].isin(wb)]['ovaWB'].values)
@@ -173,22 +204,29 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
                     ova_sum = ovaWB + ovaFB + ovaCB + ovaDM
                     def_list.append(wb + fb + cb + dm)
                     ova.append(ova_sum)
+    # get the pos_order in order
     pos_order = []
     for k in fm:
         for num in range(fm[k]):
             pos_order.append(k)
+
+    # get the defenders with the max ova
     for player in list(def_list[ova.index(max(ova))]):
+        # get the pos of the current player
         pos = pos_order[list(def_list[ova.index(max(ova))]).index(player) + 1]
+        # save to the dict as {ID:[Name,Position,ova]}
         dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
         dictc[player].append(pos)
         dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
+        # remove the player selected
         tp = tp.drop(tp[tp['ID'] == player].index)
+
+    # next, attackers
     p_list = tp[tp['ovaCM'] >= tp['ovaCB']].sort_values('ova', ascending=False).head(
-        int((fm['CM'] + fm['WM'] + fm['AM'] + fm['CF'] + fm['WW'] + fm['ST']) * 1.5))
+        int(round((fm['CM'] + fm['WM'] + fm['AM'] + fm['CF'] + fm['WW'] + fm['ST']) * 1.5)))
     name_set = set(p_list['ID'].values)
     ova = []
     att_list = []
-    ova_temp = 0
     for cm in itertools.combinations(name_set, fm['CM']):
         rest2 = name_set.difference(cm)
         ovaCM = sum(p_list[p_list['ID'].isin(cm)]['ovaCM'].values)
@@ -207,10 +245,8 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
                         for st in itertools.combinations(rest6, fm['ST']):
                             ovaST = sum(p_list[p_list['ID'].isin(st)]['ovaST'].values)
                             ova_sum = ovaCM + ovaWM + ovaAM + ovaWW + ovaCF + ovaST
-                            if ova_sum > ova_temp:
-                                ova_temp = ova_sum
-                                att_list.append(cm + wm + am + ww + cf + st)
-                                ova.append(ova_sum)
+                            att_list.append(cm + wm + am + ww + cf + st)
+                            ova.append(ova_sum)
 
     pos_order = []
     for k in fm:
@@ -228,15 +264,14 @@ def best_eleven(p, ban_list=[], fm=form['433FLAT']):
 
 # input some players, such as a club or a nation, you can also input the players you want.
 # output a form makes up the highest ova
-# well... using greedy algorithm in the function start_eleven(), the result may not be the best
-# while using the best_eleven(),you may get the best result, but cost much more time.
-# still need to be optimized
-def best_form(p, ban_list=[]):
+# well... you can decide which algorithm to use either best_eleven or starting_eleven
+# while using the best_eleven(),you may get the result at once, but with lower accuracy
+# while using the best_eleven(),you may get the best result, but cost much more time
+def best_form(p, ban_list=None):
+    if ban_list is None:
+        ban_list = []
     dict_form = {}
     for k in form:
-        # print('now '+k)
-        # # consume so much time that have to measure it
-        # print(time.strftime('%H:%M:%S', time.localtime(time.time())))
         dictc = best_eleven(p, ban_list=ban_list, fm=form[k])
         team_ova = 0
         for kc in dictc:
@@ -252,7 +287,9 @@ def best_form(p, ban_list=[]):
     return ret
 
 
-def multi_form(k, p, ban=[]):
+def multi_form(k, p, ban=None):
+    if ban is None:
+        ban = []
     dict_form = {}
     dictc = best_eleven(p, ban_list=ban, fm=form[k])
     team_ova = 0
@@ -262,8 +299,10 @@ def multi_form(k, p, ban=[]):
     return dict_form
 
 
-def best_form_multi(p, ban_list=[]):
-    # use a multiprocess to get a 3x speed for calc
+# use a multiprocess to get a 3x speed for calc
+def best_form_multi(p, ban_list=None):
+    if ban_list is None:
+        ban_list = []
     pool = Pool(5)
     res = []
     dict_form = {}
@@ -279,6 +318,5 @@ def best_form_multi(p, ban_list=[]):
         ova_list.append(dict_form[k][1])
         key_list.append(k)
     best_fm = key_list[ova_list.index(max(ova_list))]
-    # return [best_fm,max(ova_list)]
     ret = {best_fm: dict_form[best_fm][0]}
     return ret

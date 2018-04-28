@@ -59,9 +59,7 @@ def starting_eleven(p, ban_list=None, fm=form['433FLAT']):
     # so select the player with the highest GK point
     tp = df.sort_values('ovaGK', ascending=False)
     # save to the dict as {ID:[Name,Position,ova]}
-    dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-    dictc[tp['ID'].iloc[0]].append('GK')
-    dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+    dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'GK', tp['ovaGK'].iloc[0]]
     # remove the player selected
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
@@ -69,81 +67,61 @@ def starting_eleven(p, ban_list=None, fm=form['433FLAT']):
     if fm['WB'] == 2:
         for i in range(fm['WB']):
             tp = tp.sort_values('ovaWB', ascending=False)
-            dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-            dictc[tp['ID'].iloc[0]].append('WB')
-            dictc[tp['ID'].iloc[0]].append(tp['ovaWB'].iloc[0])
+            dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'WB', tp['ovaWB'].iloc[0]]
             tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for FB
     for i in range(fm['FB']):
         tp = tp.sort_values('ovaFB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('FB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaFB'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'FB', tp['ovaFB'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CB
     for i in range(fm['CB']):
         tp = tp.sort_values('ovaCB', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('CB')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaCB'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'CB', tp['ovaCB'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for DM
     for i in range(fm['DM']):
         tp = tp.sort_values('ovaDM', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('DM')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaDM'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'DM', tp['ovaDM'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CM
     for i in range(fm['CM']):
         tp = tp.sort_values('ovaCM', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('CM')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaCM'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'CM', tp['ovaCM'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WM
     for i in range(fm['WM']):
         tp = tp.sort_values('ovaWM', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('WM')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaWM'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'WM', tp['ovaWM'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for AM
     for i in range(fm['AM']):
         tp = tp.sort_values('ovaAM', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('AM')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaAM'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'AM', tp['ovaAM'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for WW
     for i in range(fm['WW']):
         tp = tp.sort_values('ovaWW', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('WW')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaWW'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'WW', tp['ovaWW'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for CF
     for i in range(fm['CF']):
         tp = tp.sort_values('ovaCF', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('CF')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaCF'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'CF', tp['ovaCF'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # fit for ST
     for i in range(fm['ST']):
         tp = tp.sort_values('ovaST', ascending=False)
-        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-        dictc[tp['ID'].iloc[0]].append('ST')
-        dictc[tp['ID'].iloc[0]].append(tp['ovaST'].iloc[0])
+        dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'ST', tp['ovaST'].iloc[0]]
         tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
     # return the dict
@@ -169,9 +147,7 @@ def best_eleven(p, ban_list=None, fm=form['433FLAT']):
     # so select the player with the highest GK point
     tp = df.sort_values('ovaGK', ascending=False)
     # save to the dict as {ID:[Name,Position,ova]}
-    dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0]]
-    dictc[tp['ID'].iloc[0]].append('GK')
-    dictc[tp['ID'].iloc[0]].append(tp['ovaGK'].iloc[0])
+    dictc[tp['ID'].iloc[0]] = [tp['Name'].iloc[0], 'GK', tp['ovaGK'].iloc[0]]
     # remove the player selected
     tp = tp.drop(tp[tp['ID'] == tp['ID'].iloc[0]].index)
 
@@ -215,9 +191,8 @@ def best_eleven(p, ban_list=None, fm=form['433FLAT']):
         # get the pos of the current player
         pos = pos_order[list(def_list[ova.index(max(ova))]).index(player) + 1]
         # save to the dict as {ID:[Name,Position,ova]}
-        dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
-        dictc[player].append(pos)
-        dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
+        dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0],
+                         pos, tp['ova'+pos][tp[tp['ID']==player].index[0]]]
         # remove the player selected
         tp = tp.drop(tp[tp['ID'] == player].index)
 
@@ -255,10 +230,8 @@ def best_eleven(p, ban_list=None, fm=form['433FLAT']):
     for player in list(att_list[ova.index(max(ova))]):
         pos = pos_order[
             list(att_list[ova.index(max(ova))]).index(player) + (fm['FB'] + fm['WB'] + fm['CB'] + fm['DM'] + 1)]
-        dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0]]
-        dictc[player].append(pos)
-        dictc[player].append(calc(p_list[p_list['ID'] == player], False)[pos])
-
+        dictc[player] = [p_list[p_list['ID'] == player]['Name'].values[0],
+                         pos, tp['ova'+pos][tp[tp['ID']==player].index[0]]]
     return dictc
 
 

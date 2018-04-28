@@ -1,10 +1,9 @@
 import copy
-import time
-import itertools
 
 from scipy.spatial.distance import pdist, squareform
+from sklearn.decomposition import PCA
 
-from Analyze.point_calc import calc, as_attacker, as_midfield, as_defender, df_calc
+from Analyze.point_calc import calc
 
 # attr to calc, 33d without Composure
 alla = [
@@ -16,7 +15,6 @@ alla = [
     'Marking', 'Standing_Tackle', 'Sliding_Tackle',
     'GK_Diving', 'GK_Handling', 'GK_Kicking', 'GK_Positioning', 'GK_Reflexes'
 ]
-
 
 # the attr that related with WingBack
 WB = ['Acceleration', 'Sprint_Speed', 'Stamina', 'Reactions', 'Interceptions', 'Ball_Control', 'Crossing',
@@ -67,7 +65,7 @@ def select_rank(p, pid=41, cond='ova'):
     return int(rk)
 
 
-# determine best position for a player, input a slice of a player, thus df[alla].iloc[0, :]
+# determine best position for a player, input a slice of a player, thus df[alla]
 # output the position at which the player get the highest OVA as string.
 def best_pos(p):
     # get dict of pos
@@ -89,6 +87,15 @@ def top_pos(p, pos='CM'):
     return p.sort_values('point' + pos, ascending=False)
 
 
+# select a player by id; input the whole dataframe with the pid you want, output the dataframe of the player
+def select_player(df, pid):
+    return df[df['ID'] == pid]
+
+
+def select_player_by_list(df, plist):
+    return df[df['ID'].isin(plist)]
+
+
 # select players with the same team
 def select_team(p, club='Arsenal'):
     mates = p[p['Club'] == club]
@@ -102,11 +109,14 @@ def select_nation(p, nation='China PR'):
 
 
 # get similar players that similar to the player input
-def similar(p=[], tid=41, num=10):
+def similar(p, tid=41, num=10):
     # determine the best position for the target player and accordingly set the player_s
-    player_s = p[eval(best_pos(p[p['ID'] == tid][alla].iloc[0, :]))]
+    player_s = p[eval(best_pos(p[p['ID'] == tid][alla]))]
+
     pid = p['ID']
     name = p['Name']
+    # index of target with tid
+    target = p[p['ID'] == tid].index[0]
 
     dis = []
     IDs = []
@@ -117,19 +127,13 @@ def similar(p=[], tid=41, num=10):
     player_dis = squareform(player_dis)
 
     for i in range(player_s.count()[0]):
-        if pid[i] == tid:
-            target = i
-    for i in range(player_s.count()[0]):
-        if pid[i] != tid:
-            dis.append(player_dis[i][target])
-            IDs.append(pid[i])
-            Names.append(name[i])
+        dis.append(player_dis[i][target])
+        IDs.append(pid[i])
+        Names.append(name[i])
     distemp = copy.deepcopy(dis)
     distemp.sort()
     dict_s = {}
     # it may be wise to include the target player in the return dict
-    dict_s[0] = [tid, p[p['ID'] == tid]['Name'].values[0]]
-    for i in range(num):
-        dict_s[i + 1] = [IDs[dis.index(distemp[i])], Names[dis.index(distemp[i])]]
-
+    for i in range(num+1):
+        dict_s[i] = [IDs[dis.index(distemp[i])], Names[dis.index(distemp[i])], round(distemp[i])]
     return dict_s
